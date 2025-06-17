@@ -82,10 +82,22 @@ local settingsTable = {
 		-- rayfieldprompts
 
 	},
-	System = {
-		usageAnalytics = {Type = 'toggle', Value = true, Name = 'Anonymised Analytics'},
-		autoStart = {Type = 'toggle', Value = false, Name = 'Auto Start Feature'} -- 👈 ADD THIS
-	}
+System = {
+    usageAnalytics = {Type = 'toggle', Value = true, Name = 'Anonymised Analytics'},
+    autoStart = {
+        Type = 'toggle',
+        Value = false,
+        Name = 'Auto Start Feature',
+        Element = {
+            Callback = function(value)
+                if value then
+                    print("autostart") -- ✅ What happens when toggle is ON
+                end
+            end
+        }
+    }
+}
+
 }
 
 -- Settings that have been overridden by the developer. These will not be saved to the user's configuration file
