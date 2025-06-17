@@ -84,25 +84,14 @@ local settingsTable = {
 	},
 System = {
     usageAnalytics = {Type = 'toggle', Value = true, Name = 'Anonymised Analytics'},
-    autoStart = {
-        Type = 'toggle',
-        Value = false,
-        Name = 'Auto Start Feature',
-        Element = {
-            Callback = function(value)
-                if value then
-                    print("autostart") -- ✅ What happens when toggle is ON
-                end
-            end
-        }
-    }
+    autoStart = {Type = 'toggle', Value = false, Name = 'Auto Start Feature'},
 }
+
 
 }
 
--- Settings that have been overridden by the developer. These will not be saved to the user's configuration file
--- Overridden settings always take precedence over settings in the configuration file, and are cleared if the user changes the setting in the UI
-local overriddenSettings: { [string]: any } = {} -- For example, overriddenSettings["System.rayfieldOpen"] = "J"
+
+local overriddenSettings: { [string]: any } = {} 
 local function overrideSetting(category: string, name: string, value: any)
 	overriddenSettings[`{category}.{name}`] = value
 end
@@ -115,10 +104,44 @@ local function getSetting(category: string, name: string): any
 	end
 end
 
+
+if file ~= {} then
+	for categoryName, settingCategory in pairs(settingsTable) do
+		if file[categoryName] then
+			for settingName, setting in pairs(settingCategory) do
+				if file[categoryName][settingName] then
+					setting.Value = file[categoryName][settingName].Value
+					setting.Element:Set(getSetting(categoryName, settingName)) -- this line exists
+				end
+			end
+		end
+	end
+end
+
+-- Add custom toggle logic
+task.spawn(function()
+	local autoStart = getSetting("System", "autoStart")
+	if autoStart then
+		print("autostart") -- ✅ when toggle is ON at startup
+	end
+
+	-- Attach live toggle listener (when user toggles it later)
+	local setting = settingsTable.System.autoStart
+	if setting and setting.Element and typeof(setting.Element.Set) == "function" then
+		setting.Element.Callback = function(value)
+			if value then
+				print("autostart") -- ✅ when toggled manually ON
+			end
+		end
+	end
+end)
+
+
 -- If requests/analytics have been disabled by developer, set the user-facing setting to false as well
 if requestsDisabled then
 	overrideSetting("System", "usageAnalytics", false)
-	overrideSetting("System", "autoStart", false) -- 👈 ADD THIS
+	overrideSetting("System", "autoStart", false) 
+	overrideSetting("System", "Fix", false) 
 end
 
 local HttpService = getService('HttpService')
