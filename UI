@@ -8,7 +8,7 @@
 	Max   | Programming
 
 ]]
-
+print("new")
 if debugX then
 	warn('Initialising Rayfield')
 end
@@ -83,6 +83,10 @@ local settingsTable = {
 		autoStart = {Type = 'toggle', Value = false, Name = 'Auto Start Feature'},
 	}
 }
+
+
+
+
 
 local overriddenSettings: { [string]: any } = {}
 local function overrideSetting(category: string, name: string, value: any)
