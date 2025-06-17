@@ -8,7 +8,11 @@
 	Max   | Programming
 
 ]]
-warn('2nd')
+
+
+
+print("3rd")
+
 if debugX then
 	warn('Initialising Rayfield')
 end
@@ -79,13 +83,58 @@ local settingsTable = {
 		rayfieldOpen = {Type = 'bind', Value = 'K', Name = 'Rayfield Keybind'},
 	},
 	System = {
-		usageAnalytics = {Type = 'toggle', Value = true, Name = 'Anonymised Analytics'},
-		autoStart = {Type = 'toggle', Value = false, Name = 'Auto Start Feature'},
+		AntiAFK = {Type = 'toggle', Value = false, Flag = "AntiAFK", Name = 'Anti AFK'},
+		autoStart = {Type = 'toggle', Value = false, Flag = "Auto Start", Name = 'Auto Start Feature'},
+
+
 	}
 }
 
 
 
+-- ✅ Toggle print for autoStart
+
+--[[
+
+
+Anti AFK
+Script Optimised
+Rejoin
+Serverhop
+AutoRejoin
+AutoServerhop
+Load Server Hunter
+LOW GFX
+Disable 3D Rendering
+
+]]
+
+
+task.spawn(function()
+	repeat task.wait() until settingsTable.System.autoStart.Element
+
+	if getSetting("System", "autoStart") then
+		print("autostart")
+	end
+	if getSetting("System", "AntiAFK") then
+		print("Anti AFK")
+	end
+
+	settingsTable.System.autoStart.Element.Callback = function(value)
+	if value then
+		print("autostart")
+	end
+	settingsTable.System.AntiAFK.Element.Callback = function(value)
+	if value then
+		print("Anti AFK Enabled")
+	end
+
+
+
+
+
+	end
+end)
 
 
 local overriddenSettings = {}
@@ -118,26 +167,15 @@ if file and next(file) then
 	end
 end
 
--- ✅ Toggle print for autoStart
-task.spawn(function()
-	repeat task.wait() until settingsTable.System.autoStart.Element
 
-	if getSetting("System", "autoStart") then
-		print("autostart")
-	end
 
-	settingsTable.System.autoStart.Element.Callback = function(value)
-		if value then
-			print("autostart")
-		end
-	end
-end)
+
+
 
 -- ✅ Overrides
 if requestsDisabled then
 	overrideSetting("System", "usageAnalytics", false)
 	overrideSetting("System", "autoStart", false)
-	overrideSetting("System", "Fix", false)
 end
 
 
