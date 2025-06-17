@@ -76,22 +76,15 @@ local ConfigurationFolder = RayfieldFolder.."/Configurations"
 local ConfigurationExtension = ".rfld"
 local settingsTable = {
 	General = {
-		-- if needs be in order just make getSetting(name)
 		rayfieldOpen = {Type = 'bind', Value = 'K', Name = 'Rayfield Keybind'},
-		-- buildwarnings
-		-- rayfieldprompts
-
 	},
-System = {
-    usageAnalytics = {Type = 'toggle', Value = true, Name = 'Anonymised Analytics'},
-    autoStart = {Type = 'toggle', Value = false, Name = 'Auto Start Feature'},
+	System = {
+		usageAnalytics = {Type = 'toggle', Value = true, Name = 'Anonymised Analytics'},
+		autoStart = {Type = 'toggle', Value = false, Name = 'Auto Start Feature'},
+	}
 }
 
-
-}
-
-
-local overriddenSettings: { [string]: any } = {} 
+local overriddenSettings: { [string]: any } = {}
 local function overrideSetting(category: string, name: string, value: any)
 	overriddenSettings[`{category}.{name}`] = value
 end
@@ -104,45 +97,44 @@ local function getSetting(category: string, name: string): any
 	end
 end
 
-
+-- This goes after your file-loading logic
 if file ~= {} then
 	for categoryName, settingCategory in pairs(settingsTable) do
 		if file[categoryName] then
 			for settingName, setting in pairs(settingCategory) do
 				if file[categoryName][settingName] then
 					setting.Value = file[categoryName][settingName].Value
-					setting.Element:Set(getSetting(categoryName, settingName)) -- this line exists
+					setting.Element:Set(getSetting(categoryName, settingName))
 				end
 			end
 		end
 	end
 end
 
--- Add custom toggle logic
+-- ✅ Corrected toggle hook
 task.spawn(function()
-	local autoStart = getSetting("System", "autoStart")
-	if autoStart then
-		print("autostart") -- ✅ when toggle is ON at startup
+	repeat task.wait() until settingsTable.System.autoStart.Element ~= nil
+
+	if getSetting("System", "autoStart") then
+		print("autostart")
 	end
 
-	-- Attach live toggle listener (when user toggles it later)
-	local setting = settingsTable.System.autoStart
-	if setting and setting.Element and typeof(setting.Element.Set) == "function" then
-		setting.Element.Callback = function(value)
-			if value then
-				print("autostart") -- ✅ when toggled manually ON
-			end
+	settingsTable.System.autoStart.Element:Set(getSetting("System", "autoStart")) -- ensures visual match
+
+	settingsTable.System.autoStart.Element.Callback = function(value)
+		if value then
+			print("autostart")
 		end
 	end
 end)
 
-
--- If requests/analytics have been disabled by developer, set the user-facing setting to false as well
+-- ✅ Overrides
 if requestsDisabled then
 	overrideSetting("System", "usageAnalytics", false)
-	overrideSetting("System", "autoStart", false) 
-	overrideSetting("System", "Fix", false) 
+	overrideSetting("System", "autoStart", false)
+	overrideSetting("System", "Fix", false)
 end
+
 
 local HttpService = getService('HttpService')
 local RunService = getService('RunService')
