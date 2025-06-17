@@ -8,7 +8,7 @@
 	Max   | Programming
 
 ]]
-print("new")
+warn('2nd')
 if debugX then
 	warn('Initialising Rayfield')
 end
@@ -88,42 +88,43 @@ local settingsTable = {
 
 
 
-local overriddenSettings: { [string]: any } = {}
-local function overrideSetting(category: string, name: string, value: any)
-	overriddenSettings[`{category}.{name}`] = value
+local overriddenSettings = {}
+
+local function overrideSetting(category, name, value)
+	overriddenSettings[category .. "." .. name] = value
 end
 
-local function getSetting(category: string, name: string): any
-	if overriddenSettings[`{category}.{name}`] ~= nil then
-		return overriddenSettings[`{category}.{name}`]
-	elseif settingsTable[category][name] ~= nil then
+local function getSetting(category, name)
+	if overriddenSettings[category .. "." .. name] ~= nil then
+		return overriddenSettings[category .. "." .. name]
+	elseif settingsTable[category] and settingsTable[category][name] ~= nil then
 		return settingsTable[category][name].Value
 	end
 end
 
--- This goes after your file-loading logic
-if file ~= {} then
+-- ✅ FIX: use `next(file)` to check if it's not empty
+if file and next(file) then
 	for categoryName, settingCategory in pairs(settingsTable) do
 		if file[categoryName] then
 			for settingName, setting in pairs(settingCategory) do
 				if file[categoryName][settingName] then
 					setting.Value = file[categoryName][settingName].Value
-					setting.Element:Set(getSetting(categoryName, settingName))
+					if setting.Element then
+						setting.Element:Set(getSetting(categoryName, settingName))
+					end
 				end
 			end
 		end
 	end
 end
 
--- ✅ Corrected toggle hook
+-- ✅ Toggle print for autoStart
 task.spawn(function()
-	repeat task.wait() until settingsTable.System.autoStart.Element ~= nil
+	repeat task.wait() until settingsTable.System.autoStart.Element
 
 	if getSetting("System", "autoStart") then
 		print("autostart")
 	end
-
-	settingsTable.System.autoStart.Element:Set(getSetting("System", "autoStart")) -- ensures visual match
 
 	settingsTable.System.autoStart.Element.Callback = function(value)
 		if value then
